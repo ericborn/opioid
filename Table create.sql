@@ -44,3 +44,8 @@ Revised_Company_Name TEXT,
 Reporter_family TEXT,
 dos_str DECIMAL --REAL
 );
+
+-- read from csv into table
+--COPY opioids FROM 'F:\opioid data\test.csv' DELIMITER ',' CSV HEADER;
+
+select * from opioids
