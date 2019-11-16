@@ -37,6 +37,8 @@ fake_df.to_csv(path+'\\fake.csv', index = False)
 
 fake_path = os.path.join(path, 'fake.csv')
 
+# https://stackoverflow.com/questions/42900757/sequentially-read-huge-csv-file-in-python
+
 # setup variables
 chunksize = 10
 i = 0
@@ -47,6 +49,7 @@ for df in pd.read_csv(fake_path, chunksize=chunksize, iterator=True):
     test_df = df.rename(columns={c: c.replace(' ', '') for c in df.columns}) 
     df.index += j
     i+=1
+    
     meta = MetaData()
 
     # Creates a connection string
