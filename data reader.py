@@ -26,26 +26,72 @@ full_path = os.path.join(path, file + '.tsv')
 # start batch read/insert
 ####
 
+# view transaction data column
+#arcos_df.iloc[:,30]
+
+# view row 89, all columns
+arcos_df.iloc[391900,:]
+
+arcos_df.iloc[391900,15]
+
+
+arcos_df['BUYER_ADDRESS2'] = 
+
+arcos_df['BUYER_ADDRESS2'].apply(lambda x: '601 J ST' if x == r'\601 \"\"J\"\" ST\""' else arcos_df['BUYER_ADDRESS2'])
+
+arcos_df.loc[arcos_df.BUYER_ADDRESS2 == r'\601 \"\"J\"\" ST\""']
+
+
+# view by column name
+#arcos_df['QUANTITY']
+
+
 # setup variables
-chunksize = 10000
+chunksize = 50000
 i = 0
 j = 1
 
 # for loop to read csv and write to db
 for df in pd.read_csv(full_path, chunksize=chunksize, sep='\t',
                       iterator=True):
-    arcos_df = df.rename(columns={c: c.replace(' ', '') for c in df.columns})
-    # converts int format to month/day/year
-    arcos_df['TRANSACTION_DATE'] = pd.to_datetime(arcos_df['TRANSACTION_DATE'], 
-                                                  format='%m%d%Y')
+    arcos_df = df
     
-    # convert QUANTITY from float to int
-    arcos_df['QUANTITY'] = arcos_df['QUANTITY'].astype('int64')
-    arcos_df['DOSAGE_UNIT'] = arcos_df['DOSAGE_UNIT'].astype('int64')
-    arcos_df['MME_Conversion_Factor'] = arcos_df['MME_Conversion_Factor'].astype('int64')
+    try:
+        # converts int format to month/day/year
+        arcos_df['TRANSACTION_DATE'] = pd.to_datetime(
+                                                arcos_df['TRANSACTION_DATE'], 
+                                                format='%m%d%Y')
+    except:
+        pass
+    arcos_df['BUYER_ADDRESS2'].apply(lambda x: '601 J ST' 
+            if x == r'\601 \"\"J\"\" ST\""' else arcos_df['BUYER_ADDRESS2'])
+
+    # convert QUANTITY, DOSAGE_UNIT, MME_Conversion_Factor from float to int
+#    try:
+#        arcos_df['QUANTITY'] = arcos_df['QUANTITY'].astype('int64')
+#    except:
+#        pass
+    
+#    try:
+#        arcos_df['DOSAGE_UNIT'] = arcos_df['DOSAGE_UNIT'].astype('int64')
+#    except:
+#        pass
+    try:
+        arcos_df['MME_Conversion_Factor'] = (
+                             arcos_df['MME_Conversion_Factor'].astype('int64'))
+    except:
+        pass
+    
+    # fill na with 0
+    #arcos_df = arcos_df.fillna(value = 0)
+    
+    # increment index
     df.index += j
     i+=1
-    
+ 
+    ###   
+    # SQL
+    ###
     meta = MetaData()
 
     # Creates a connection string
@@ -55,9 +101,7 @@ for df in pd.read_csv(full_path, chunksize=chunksize, sep='\t',
     # datatypes defined in the dataframe
     arcos_df.head(0).to_sql('take', engine, if_exists = 'replace', \
                             index = False)
-###   
-# SQL
-###
+
     # raw connection
     conn = engine.raw_connection()
     
@@ -98,7 +142,7 @@ for df in pd.read_csv(full_path, chunksize=chunksize, sep='\t',
 ######
 
 # read rows set number of rows
-arcos_df = pd.read_csv(full_path,nrows=5000, sep='\t')
+arcos_df = pd.read_csv(full_path,nrows=392000, sep='\t')
 
 # read full tsv to df
 # !!!! DO NOT USE, VERY LARGE FILE, VERY SLOW!!!!
@@ -200,7 +244,8 @@ j = 1
 
 # for loop to read csv and write to db
 for df in pd.read_csv(test_full_path, chunksize=chunksize, iterator=True):
-    test_df = df.rename(columns={c: c.replace(' ', '') for c in df.columns}) 
+    #test_df = df.rename(columns={c: c.replace(' ', '') for c in df.columns}) 
+    test_df = df
     df.index += j
     i+=1
     
