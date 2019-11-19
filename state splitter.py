@@ -4,6 +4,12 @@ Created on Tue Nov 19 10:08:24 2019
 
 @author: Eric
 """
+#from psycopg2 import connect, DatabaseError
+#from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+import psycopg2
+from sys import exit
+from sqlalchemy import create_engine, MetaData, insert, Table, Column, String,\
+                       Integer, Float, Boolean, VARCHAR, SmallInteger
 
 states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado',
           'Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho',
@@ -31,17 +37,73 @@ for st in states:
     
     i += 1
 
+#####
+# 3 state test
+#####
+    
 states_test = ['Alabama','Alaska','Arizona']
 initials_test = ['AL','AK','AZ']
 
+i = 0
 
+###
+# Start SQL
+###
+
+# Creates a connection string
+engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
+
+# raw connection
+conn = engine.raw_connection()
+
+# Opens a cursor to write the data
+cur = conn.cursor()
 
 for st in states_test: 
-    i = 0
+    print(states_test[i], initials_test[i])
+    i += 1
     
-    INSERT INTO st
+cur.executemany(
+    '''
+    INSERT INTO ?
     SELECT *
     FROM opioids
-    WHERE state = initials_test[i]
+    WHERE state = ?
+    ''', (states_test, initials_test)
+)
+cur.close()
+conn.commit()
+conn.close()
+
+INSERT INTO st
+SELECT *
+FROM opioids
+WHERE state = initials_test[i]
     
-    i += 1
+    
+    
+try:
+    #Connects and creates the desired database
+    conn = connect('dbname=arcos user=python password=password')
+
+    #conn.setAutoCommit(true)
+    cur = conn.cursor()
+    #cur.execute('SET AUTOCOMMIT = ON')
+    cur.executemany(
+        '''
+        INSERT INTO ?
+        SELECT *
+        FROM opioids
+        WHERE state = ?
+        ''', (states_test, initials_test)
+    )
+    cur.close()
+    conn.commit()
+    conn.close()
+except (Exception, DatabaseError) as dbError:
+    print(dbError)
+
+
+####
+# End SQL
+####

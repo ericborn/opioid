@@ -82,39 +82,40 @@ def tsv_todb():
     
         # Creates a connection string
         engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
-        
-        # Creates a table using the column names and 
-        # datatypes defined in the dataframe
-    #    arcos_df.head(0).to_sql('take', engine, if_exists = 'replace', \
-    #                            index = False)
-    
+
         # raw connection
         conn = engine.raw_connection()
-        
+
         # Opens a cursor to write the data
         cur = conn.cursor()
-        
+
         # prepares an in memory IO stream
         output = io.StringIO()
-        
+
         # converts the dataframe contents to csv format and
         # the IO steam as its destination
         arcos_df.to_csv(output, sep='\t', header=False, index=False)
-        
+
         # sets the file offset position to 0
         output.seek(0)
-        
+
         # retrieves the contents of the output stream
         contents = output.getvalue()
-        
+
         # Copys from the stream to the opioids table
         cur.copy_from(output, 'opioids', null="") # null values become ''
-        
+
         # Commits on the connection to the database
         conn.commit()
-    ##SQL
+
+        # Added but not tested, 
+        # closing the connection after each insert
+        # should probably be opening a connection outside of the loop
+        # and closing once the loop completes
+        conn.close()
+
         j = arcos_df.index[-1] + 1
-    
+
     ####
     # End SQL
     ####
