@@ -13,11 +13,30 @@ from psycopg2 import sql
 from sqlalchemy import create_engine
 
 #####
-# 3 state test
+# state
 #####
     
-states_test = ['alabama','alaska','arizona']
-initials_test = ['AL','AK','AZ']
+#states_test = ['Alabama','Alaska','Arizona']
+#initials_test = ['AL','AK','AZ']
+
+states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado',
+          'Connecticut','Washington_dc','Delaware','Florida','Georgia',
+          'Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky',
+          'Louisiana','Maine','Maryland','Massachusetts','Michigan',
+          'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
+          'New_Hampshire','New_Jersey','New_Mexico','New_York',
+          'North_Carolina','North_Dakota','Ohio','Oklahoma','Oregon',
+          'Pennsylvania','Rhode_Island','South_Carolina','South_Dakota',
+          'Tennessee','Texas','Utah','Vermont','Virginia','Washington',
+          'West_Virginia','Wisconsin','Wyoming']
+
+# convert to lowercase
+states = [x.lower() for x in states]
+
+initials = ['AL','AK','AZ','AR','CA','CO','CT','DC','DE','FL','GA','HI','ID',
+            'IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO',
+            'MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA',
+            'RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
 
 ###
 # Start SQL
@@ -34,20 +53,17 @@ conn = engine.raw_connection()
 # Opens a cursor to write the data
 cur = conn.cursor()
 
-#query = sql.SQL("INSERT INTO {0} SELECT * FROM opioids WHERE buyer_state = {1}").format(
-#            sql.Identifier(states_test[0]), sql.Literal(initials_test[0]))
-
-#print(query.as_string(cur))
-
-#cur.execute(query)
-
+# index variable
 i = 0
 
-for state in states_test: 
-    table_name = states_test[i]
-    init_name = initials_test[i]
-    
-    #print(i)
+for state in states: 
+    table_name = states[i]
+    init_name = initials[i]
+
+    # used to remove data from all state tables 
+    # without deleting the tables themselves
+    #query = sql.SQL('truncate {}').format(sql.Identifier(table_name))
+
     # stores the current state and state initial into the query
     # query inserts into state name table with * selected from opioids table
     # where buyer_state is equal to the states initials
@@ -56,12 +72,16 @@ for state in states_test:
     query = sql.SQL("INSERT INTO {0} SELECT * FROM opioids WHERE buyer_state = {1}").format(
             sql.Identifier(table_name), sql.Literal(init_name))
     
+    # print the query as it would be passed to SQL
     #print(query.as_string(cur))
     
     # executes the query
     cur.execute(query)
+    
+    # iterate to the next index in the states
     i += 1
 
+# closes the SQL cursor, commits all SQL transactions, closes connection
 cur.close()
 conn.commit()
 conn.close()
@@ -69,30 +89,3 @@ conn.close()
 ####
 # End SQL
 ####
-
-
-#states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado',
-#          'Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho',
-#          'Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana',
-#          'Maine','Maryland','Massachusetts','Michigan','Minnesota',
-#          'Mississippi','Missouri','Montana','Nebraska','Nevada',
-#          'New_Hampshire','New_Jersey','New_Mexico','New_York',
-#          'North_Carolina','North_Dakota','Ohio','Oklahoma','Oregon',
-#          'Pennsylvania','Rhode_Island','South_Carolina','South_Dakota',
-#          'Tennessee','Texas','Utah','Vermont','Virginia','Washington',
-#          'West_Virginia','Wisconsin','Wyoming']
-#
-#initials = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL',
-#           'IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT',
-#           'NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI',
-#           'SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
-#
-#for st in states: 
-#    i = 0
-#    
-#    INSERT INTO st
-#    SELECT *
-#    FROM opioids
-#    WHERE state = initials[i]
-#    
-#    i += 1
