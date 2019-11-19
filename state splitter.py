@@ -49,14 +49,13 @@ engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
 # raw connection
 conn = engine.raw_connection()
 
-
-# Opens a cursor to write the data
-cur = conn.cursor()
-
 # index variable
 i = 0
 
 for state in states: 
+    # Opens a cursor to write the data
+    cur = conn.cursor()
+    
     table_name = states[i]
     init_name = initials[i]
 
@@ -81,9 +80,11 @@ for state in states:
     # iterate to the next index in the states
     i += 1
 
-# closes the SQL cursor, commits all SQL transactions, closes connection
-cur.close()
-conn.commit()
+    # closes the SQL cursor, commits all SQL transactions
+    cur.close()
+    conn.commit()
+
+# closes connection to the SQL server
 conn.close()
 
 ####
