@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS opioids;
+--DROP TABLE IF EXISTS opioids;
 
-CREATE TABLE opioids (
+CREATE TABLE alabama ( --opioids (
 --REPORTER_DEA_NO TEXT,
 --REPORTER_BUS_ACT TEXT,
 REPORTER_NAME TEXT,
@@ -48,4 +48,4 @@ dos_str DECIMAL --REAL
 -- read from csv into table
 --COPY opioids FROM 'F:\opioid data\test.csv' DELIMITER ',' CSV HEADER;
 
-select * from opioids
+--select * from opioids
