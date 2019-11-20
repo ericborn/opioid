@@ -35,6 +35,10 @@ full_path = os.path.join(path, file + '.tsv')
 # view by column name
 #arcos_df['QUANTITY']
 
+#fake_data = [[92159], ['sjkhjdf']]
+#
+#fakedf = pd.DataFrame(fake_data, columns = ['REPORTER_ZIP'])
+
 def tsv_todb():
     # setup variables
     chunksize = 250000
@@ -51,22 +55,55 @@ def tsv_todb():
     for arcos_df in pd.read_csv(full_path, chunksize=chunksize, sep='\t',
                           iterator=True, encoding='utf-8'):
         
+        # drop unneeded columns
         arcos_df.drop(arcos_df.columns[[0, 1, 10, 13, 20, 21, 22, 26, 27, 28, 29, 
                                         33, 35, 36, 37]], axis = 1, inplace = True)
         
-        try:
-            # converts int format to month/day/year
-            arcos_df['TRANSACTION_DATE'] = pd.to_datetime(
-                                                    arcos_df['TRANSACTION_DATE'], 
-                                                    format='%m%d%Y')
-        except:
-            pass
+        # converts int format to month/day/year
+        arcos_df['TRANSACTION_DATE'] = pd.to_datetime(arcos_df['TRANSACTION_DATE'], 
+                                                      format='%m%d%Y')
+        
+        # remove / from REPORTER_ADDL_CO_INFO
+        arcos_df['REPORTER_ADDL_CO_INFO'].replace(to_replace=r'/', value = ' ',
+                                                  regex = True, inplace = True)
+        
+        arcos_df['BUYER_BUS_ACT'].replace(to_replace=r'/', value = ' ',
+                                         regex = True, inplace = True)
+        
+        arcos_df['Product_Name'].replace(to_replace=r'/', value = ' ',
+                                         regex = True, inplace = True)
+        
+        # removes \ and " from buyer_address1
+        arcos_df['BUYER_ADDRESS1'].replace(to_replace=r'\\', value = '',
+                                           regex = True, inplace = True)
+        arcos_df['BUYER_ADDRESS1'].replace(to_replace=r'"', value = '',
+                                           regex = True, inplace = True)
         
         # removes \ and " from buyer_address2
-        arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'\\', value = '', 
-                                           regex = True, inplace = True)    
-        arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'"', value = '', 
-                                           regex = True, inplace = True)    
+        arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'\\', value = '',
+                                           regex = True, inplace = True)
+        arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'"', value = '',
+                                           regex = True, inplace = True)
+        
+        # remove non-digits from REPORTER_ZIP
+        arcos_df['REPORTER_ZIP'].replace(to_replace=r'\D', value = '0',
+                                                  regex = True, inplace = True)
+        
+        # remove non-digits from BUYER_ZIP
+        arcos_df['BUYER_ZIP'].replace(to_replace=r'\D', value = '0',
+                                                  regex = True, inplace = True)
+        
+        # remove non-digits from QUANTITY
+        arcos_df['QUANTITY'].replace(to_replace=r'\D', value = '0',
+                                                  regex = True, inplace = True)
+        
+        # remove non-digits from DOSAGE_UNIT
+        arcos_df['DOSAGE_UNIT'].replace(to_replace=r'\D', value = '0',
+                                                  regex = True, inplace = True)
+        
+        # remove non-digits from dos_str
+        arcos_df['dos_str'].replace(to_replace=r'\D', value = '0',
+                                                  regex = True, inplace = True)
         
         # fill na with blank string
         arcos_df = arcos_df.fillna(value = '')
@@ -124,66 +161,84 @@ tsv_todb()
 # Single fixed size read and insert into db
 ######
 
-## read rows set number of rows
-#arcos_df = pd.read_csv(full_path,nrows=1000000, sep='\t')
-#
-## view transaction data column
-##arcos_df.iloc[:,30]
-#
-## view row 89, all columns
-##arcos_df.iloc[801633,:]
-#
-## view by column name
-##arcos_df['QUANTITY']
-#
-## drops unneeded columns
-#arcos_df.drop(arcos_df.columns[[0, 1, 10, 13, 20, 21, 22, 26, 27, 28, 29, 33, 
-#                                35, 36, 37]], axis = 1, inplace = True)
-#
-## converts int format to month/day/year
-#arcos_df['TRANSACTION_DATE'] = pd.to_datetime(arcos_df['TRANSACTION_DATE'], 
-#                                              format='%m%d%Y')
-#
-## removes \ and " from buyer_address2
-#arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'\\', value = '', regex = True, inplace = True)    
-#arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'"', value = '', regex = True, inplace = True)    
-#
-## fill na with blank string
-#arcos_df = arcos_df.fillna(value = '')
-#
-## save to csv 
-#arcos_df.to_csv(path+'\\test.csv', index = False)
-#
-#####
-### Start SQL
-#####
-#
-## Creates a connection string
-#engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
-#
-## raw connection
-#conn = engine.raw_connection()
-#
-## Opens a cursor to write the data
-#cur = conn.cursor()
-#
-## prepares an in memory IO stream
-#output = io.StringIO()
-#
-## converts the dataframe contents to csv format and the IO steam as its destination
-#arcos_df.to_csv(output, sep='\t', header=False, index=False)
-#
-## sets the file offset position to 0
-#output.seek(0)
-#
-## retrieves the contents of the output stream
-#contents = output.getvalue()
-#
-## Copys from the stream to the opioids table
-#cur.copy_from(output, 'opioids_full', null="") # null values become ''
-#
-## Commits on the connection to the database
-#conn.commit()
+# read rows set number of rows
+arcos_df = pd.read_csv(full_path,nrows=150, sep='\t')
+
+# view transaction data column
+#arcos_df.iloc[:,30]
+
+# view row 89, all columns
+#arcos_df.iloc[1491502,:]
+
+# view by column name
+#arcos_df['QUANTITY']
+
+# drops unneeded columns
+arcos_df.drop(arcos_df.columns[[0, 1, 10, 13, 20, 21, 22, 26, 27, 28, 29, 33, 
+                                35, 36, 37]], axis = 1, inplace = True)
+
+# converts int format to month/day/year
+arcos_df['TRANSACTION_DATE'] = pd.to_datetime(arcos_df['TRANSACTION_DATE'], 
+                                              format='%m%d%Y')
+
+# remove / from REPORTER_ADDL_CO_INFO
+arcos_df['REPORTER_ADDL_CO_INFO'].replace(to_replace=r'/', value = ' ',
+                                          regex = True, inplace = True)
+
+arcos_df['BUYER_BUS_ACT'].replace(to_replace=r'/', value = ' ',
+                                 regex = True, inplace = True)
+
+arcos_df['Product_Name'].replace(to_replace=r'/', value = ' ',
+                                 regex = True, inplace = True)
+
+# removes \ and " from buyer_address1
+arcos_df['BUYER_ADDRESS1'].replace(to_replace=r'\\', value = '',
+                                   regex = True, inplace = True)
+arcos_df['BUYER_ADDRESS1'].replace(to_replace=r'"', value = '',
+                                   regex = True, inplace = True)
+
+# removes \ and " from buyer_address2
+arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'\\', value = '',
+                                   regex = True, inplace = True)
+arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'"', value = '',
+                                   regex = True, inplace = True)
+
+# fill na with blank string
+arcos_df = arcos_df.fillna(value = '')
+
+# save to csv 
+##arcos_df.to_csv(path+'\\test.csv', index = False)
+
+####
+## Start SQL
+####
+
+# Creates a connection string
+engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
+
+# raw connection
+conn = engine.raw_connection()
+
+# Opens a cursor to write the data
+cur = conn.cursor()
+
+# prepares an in memory IO stream
+output = io.StringIO()
+
+# converts the dataframe contents to csv format and the IO steam as its destination
+arcos_df.to_csv(output, sep='\t', header=False, index=False)
+
+# sets the file offset position to 0
+output.seek(0)
+
+# retrieves the contents of the output stream
+contents = output.getvalue()
+
+# Copys from the stream to the opioids table
+cur.copy_from(output, 'opioids_full', null="") # null values become ''
+
+# Commits on the connection to the database
+conn.commit()
 
 ####
 # End SQL
