@@ -1,7 +1,7 @@
 # Opioid Data
 The original data set is from the Automated Reports and Consolidated Ordering System (ARCOS) related to opioid sales and distribution. The data was distributed as a 150GB+ TSV file. The goal of the project was to study opioid distribution numbers across the US, but working with the original file was too resource intensive due to its size. I decided to read the data into a PostgreSQL database and then divide the data into separate tables by state, which was accomplished by a combination of SQL and Python code.
 
-Before importing the original file into SQL I performed cleaning steps such as converting the date column to a date format from an int, removing characters from int columns or special characters (/, \, *, etc.) from other columns.
+Before importing the original file into SQL I performed cleaning steps such as converting the date column to a date format from an int, removing characters from int columns or special characters (/, \\, *, etc.) from other columns.
 
 ## Notes about the data
 No data was published for the state of Alaska.
