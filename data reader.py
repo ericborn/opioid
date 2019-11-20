@@ -14,8 +14,8 @@ from sqlalchemy import create_engine, MetaData, insert, Table, Column, String,\
                        Integer, Float, Boolean, VARCHAR, SmallInteger
 
 # setup file location
-path = r'F:\opioid data'
-file = 'arcos_all_washpost'
+path = r'E:\opioid data'
+file = 'arcos_all'
 full_path = os.path.join(path, file + '.tsv')
 
 ####
@@ -37,7 +37,7 @@ full_path = os.path.join(path, file + '.tsv')
 
 def tsv_todb():
     # setup variables
-    chunksize = 150000
+    chunksize = 250000
     i = 0
     j = 1
     
@@ -62,15 +62,11 @@ def tsv_todb():
         except:
             pass
         
-        # selects all columns that are of type object
-        str_df = arcos_df.select_dtypes([np.object])
-
-        # stacks all rows, decodes to utf-8 then unstacks
-        str_df = str_df.stack().str.decode('utf-8').unstack()
-        
-        # replaces the old data with the new utf-8 data
-        for col in str_df:
-            arcos_df[col] = str_df[col]
+        # removes \ and " from buyer_address2
+        arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'\\', value = '', 
+                                           regex = True, inplace = True)    
+        arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'"', value = '', 
+                                           regex = True, inplace = True)    
         
         # fill na with blank string
         arcos_df = arcos_df.fillna(value = '')
@@ -99,10 +95,10 @@ def tsv_todb():
         output.seek(0)
 
         # retrieves the contents of the output stream
-        contents = output.getvalue()
+        #contents = output.getvalue()
 
         # Copys from the stream to the opioids table
-        cur.copy_from(output, 'opioids', null="") # null values become ''
+        cur.copy_from(output, 'opioids_full', null="") # null values become ''
 
         # Commits on the connection to the database
         conn.commit()
@@ -129,13 +125,13 @@ tsv_todb()
 ######
 
 ## read rows set number of rows
-#arcos_df = pd.read_csv(full_path,nrows=15000, sep='\t')
+#arcos_df = pd.read_csv(full_path,nrows=1000000, sep='\t')
 #
 ## view transaction data column
 ##arcos_df.iloc[:,30]
 #
 ## view row 89, all columns
-##arcos_df.iloc[1,:]
+##arcos_df.iloc[801633,:]
 #
 ## view by column name
 ##arcos_df['QUANTITY']
@@ -148,25 +144,22 @@ tsv_todb()
 #arcos_df['TRANSACTION_DATE'] = pd.to_datetime(arcos_df['TRANSACTION_DATE'], 
 #                                              format='%m%d%Y')
 #
-## convert QUANTITY from float to int
-#arcos_df['QUANTITY'] = arcos_df['QUANTITY'].astype('int64')
-#arcos_df['DOSAGE_UNIT'] = arcos_df['DOSAGE_UNIT'].astype('int64')
-#arcos_df['MME_Conversion_Factor'] = arcos_df['MME_Conversion_Factor'].astype(
-#                                                                      'int64')
+## removes \ and " from buyer_address2
+#arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'\\', value = '', regex = True, inplace = True)    
+#arcos_df['BUYER_ADDRESS2'].replace(to_replace=r'"', value = '', regex = True, inplace = True)    
+#
+## fill na with blank string
+#arcos_df = arcos_df.fillna(value = '')
+#
 ## save to csv 
 #arcos_df.to_csv(path+'\\test.csv', index = False)
 #
-#
-####
-## Start SQL
-####
-#meta = MetaData()
+#####
+### Start SQL
+#####
 #
 ## Creates a connection string
 #engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
-#
-## Creates a table using the column names and datatypes defined in the dataframe
-##arcos_df.head(0).to_sql('weaponproperties', engine, if_exists = 'replace', index = False)
 #
 ## raw connection
 #conn = engine.raw_connection()
@@ -187,11 +180,11 @@ tsv_todb()
 #contents = output.getvalue()
 #
 ## Copys from the stream to the opioids table
-#cur.copy_from(output, 'opioids', null="") # null values become ''
+#cur.copy_from(output, 'opioids_full', null="") # null values become ''
 #
 ## Commits on the connection to the database
 #conn.commit()
-#
+
 ####
 # End SQL
 ####
