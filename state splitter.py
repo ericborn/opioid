@@ -9,17 +9,18 @@ Created on Tue Nov 19 10:08:24 2019
 import psycopg2
 from sys import exit
 from psycopg2 import sql
-#from psycopg2.extensions import quote_ident
 from sqlalchemy import create_engine
 
 #####
-# state
+# list setup
 #####
-    
-#states_test = ['Alabama','Alaska','Arizona']
-#initials_test = ['AL','AK','AZ']
+ 
+# variables for testing   
+#states_test = ['alabama','arizona']
+#initials_test = ['AL','AZ']
 
-states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado',
+# full state list
+states = ['Alabama','Arizona','Arkansas','California','Colorado',
           'Connecticut','Washington_dc','Delaware','Florida','Georgia',
           'Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky',
           'Louisiana','Maine','Maryland','Massachusetts','Michigan',
@@ -30,10 +31,11 @@ states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado',
           'Tennessee','Texas','Utah','Vermont','Virginia','Washington',
           'West_Virginia','Wisconsin','Wyoming']
 
-# convert to lowercase
+# convert states to lowercase
 states = [x.lower() for x in states]
 
-initials = ['AL','AK','AZ','AR','CA','CO','CT','DC','DE','FL','GA','HI','ID',
+# full state initials list
+initials = ['AL','AZ','AR','CA','CO','CT','DC','DE','FL','GA','HI','ID',
             'IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO',
             'MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA',
             'RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
@@ -41,9 +43,7 @@ initials = ['AL','AK','AZ','AR','CA','CO','CT','DC','DE','FL','GA','HI','ID',
 ###
 # Start SQL
 ###
-
 # Creates a connection string
-# SQL Alchemy
 engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
 
 # raw connection
@@ -53,8 +53,11 @@ conn = engine.raw_connection()
 i = 0
 
 for state in states: 
-    # Opens a cursor to write the data
-    cur = conn.cursor()
+    # Opens a cursor for the table create
+    table_cur = conn.cursor()
+    
+    # Opens a cursor to insert the data
+    insert_cur = conn.cursor()
     
     table_name = states[i]
     init_name = initials[i]
@@ -62,7 +65,46 @@ for state in states:
     # used to remove data from all state tables 
     # without deleting the tables themselves
     #query = sql.SQL('truncate {}').format(sql.Identifier(table_name))
+    
+    # sql statement to create a table for each state
+    create_table = sql.SQL('''
+                           CREATE TABLE {} (
+                           REPORTER_NAME TEXT,
+                           REPORTER_ADDL_CO_INFO TEXT,
+                           REPORTER_ADDRESS1 TEXT,
+                           REPORTER_ADDRESS2 TEXT,
+                           REPORTER_CITY TEXT,
+                           REPORTER_STATE TEXT,
+                           REPORTER_ZIP INTEGER,
+                           REPORTER_COUNTY TEXT,
+                           BUYER_BUS_ACT TEXT,
+                           BUYER_NAME TEXT,
+                           BUYER_ADDRESS1 TEXT,
+                           BUYER_ADDRESS2 TEXT,
+                           BUYER_CITY TEXT,
+                           BUYER_STATE TEXT,
+                           BUYER_ZIP INTEGER,
+                           BUYER_COUNTY TEXT,
+                           DRUG_NAME TEXT,
+                           QUANTITY REAL,
+                           UNIT TEXT,
+                           TRANSACTION_DATE DATE,
+                           CALC_BASE_WT_IN_GM DECIMAL,
+                           DOSAGE_UNIT REAL,
+                           Product_Name TEXT,
+                           Combined_Labeler_Name TEXT,
+                           Revised_Company_Name TEXT,
+                           Reporter_family TEXT,
+                           dos_str DECIMAL
+                           )''').format(sql.Identifier(table_name))
 
+    # executes the query
+    table_cur.execute(create_table)
+    
+    # closes the SQL cursor, commits all SQL transactions
+    table_cur.close()
+    conn.commit()
+    
     # stores the current state and state initial into the query
     # query inserts into state name table with * selected from opioids table
     # where buyer_state is equal to the states initials
@@ -73,16 +115,16 @@ for state in states:
     
     # print the query as it would be passed to SQL
     #print(query.as_string(cur))
-    
+
     # executes the query
-    cur.execute(query)
+    insert_cur.execute(query)
+    
+    # closes the SQL cursor, commits all SQL transactions
+    insert_cur.close()
+    conn.commit()
     
     # iterate to the next index in the states
     i += 1
-
-    # closes the SQL cursor, commits all SQL transactions
-    cur.close()
-    conn.commit()
 
 # closes connection to the SQL server
 conn.close()
