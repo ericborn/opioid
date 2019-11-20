@@ -2,10 +2,17 @@
 """
 Created on Tue Nov 19 10:08:24 2019
 
-@author: Eric
-"""
-#from psycopg2 import connect, DatabaseError
+@author: Eric Born
+The purpose of this script is to segment the data from the opioids table into
+separate tables for each state based on the buyer_state column.
 
+The script will create a table for each state that is present in the data and
+then insert the data for that state from the main table.
+
+There was no data present from Alaska so the state was ignored.
+There was data present for US territories, but these were not included
+due to being only about 500 rows.
+"""
 import psycopg2
 from sys import exit
 from psycopg2 import sql
@@ -19,7 +26,7 @@ from sqlalchemy import create_engine
 #states_test = ['alabama','arizona']
 #initials_test = ['AL','AZ']
 
-# full state list
+# state list
 states = ['Alabama','Arizona','Arkansas','California','Colorado',
           'Connecticut','Washington_dc','Delaware','Florida','Georgia',
           'Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky',
@@ -34,7 +41,7 @@ states = ['Alabama','Arizona','Arkansas','California','Colorado',
 # convert states to lowercase
 states = [x.lower() for x in states]
 
-# full state initials list
+# state initials list
 initials = ['AL','AZ','AR','CA','CO','CT','DC','DE','FL','GA','HI','ID',
             'IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO',
             'MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA',
