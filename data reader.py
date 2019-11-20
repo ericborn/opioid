@@ -41,6 +41,12 @@ def tsv_todb():
     i = 0
     j = 1
     
+    # Creates a connection string
+    engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
+
+    # raw connection
+    conn = engine.raw_connection()
+    
     # for loop to read csv and write to db
     for arcos_df in pd.read_csv(full_path, chunksize=chunksize, sep='\t',
                           iterator=True, encoding='utf-8'):
@@ -55,8 +61,6 @@ def tsv_todb():
                                                     format='%m%d%Y')
         except:
             pass
-#        arcos_df['BUYER_ADDRESS2'].apply(lambda x: '601 J ST' 
-#                if x == r'\601 \"\"J\"\" ST\""' else None)
         
         # selects all columns that are of type object
         str_df = arcos_df.select_dtypes([np.object])
@@ -78,13 +82,8 @@ def tsv_todb():
         ###   
         # SQL
         ###
-        meta = MetaData()
-    
-        # Creates a connection string
-        engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
-
-        # raw connection
-        conn = engine.raw_connection()
+        
+        #meta = MetaData()
 
         # Opens a cursor to write the data
         cur = conn.cursor()
@@ -108,13 +107,11 @@ def tsv_todb():
         # Commits on the connection to the database
         conn.commit()
 
-        # Added but not tested, 
-        # closing the connection after each insert
-        # should probably be opening a connection outside of the loop
-        # and closing once the loop completes
-        conn.close()
-
+        # increments the iterator
         j = arcos_df.index[-1] + 1
+
+    # closes the connection after the loop finishes
+    conn.close()
 
     ####
     # End SQL
@@ -131,150 +128,70 @@ tsv_todb()
 # Single fixed size read and insert into db
 ######
 
-# read rows set number of rows
-arcos_df = pd.read_csv(full_path,nrows=15000, sep='\t')
-
-# view transaction data column
-#arcos_df.iloc[:,30]
-
-# view row 89, all columns
-#arcos_df.iloc[1,:]
-
-# view by column name
-#arcos_df['QUANTITY']
-
-# drops unneeded columns
-arcos_df.drop(arcos_df.columns[[0, 1, 10, 13, 20, 21, 22, 26, 27, 28, 29, 33, 
-                                35, 36, 37]], axis = 1, inplace = True)
-
-# converts int format to month/day/year
-arcos_df['TRANSACTION_DATE'] = pd.to_datetime(arcos_df['TRANSACTION_DATE'], 
-                                              format='%m%d%Y')
-
-# convert QUANTITY from float to int
-arcos_df['QUANTITY'] = arcos_df['QUANTITY'].astype('int64')
-arcos_df['DOSAGE_UNIT'] = arcos_df['DOSAGE_UNIT'].astype('int64')
-arcos_df['MME_Conversion_Factor'] = arcos_df['MME_Conversion_Factor'].astype(
-                                                                      'int64')
-# save to csv 
-arcos_df.to_csv(path+'\\test.csv', index = False)
-
-
-###
-# Start SQL
-###
-meta = MetaData()
-
-# Creates a connection string
-engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
-
-# Creates a table using the column names and datatypes defined in the dataframe
-#arcos_df.head(0).to_sql('weaponproperties', engine, if_exists = 'replace', index = False)
-
-# raw connection
-conn = engine.raw_connection()
-
-# Opens a cursor to write the data
-cur = conn.cursor()
-
-# prepares an in memory IO stream
-output = io.StringIO()
-
-# converts the dataframe contents to csv format and the IO steam as its destination
-arcos_df.to_csv(output, sep='\t', header=False, index=False)
-
-# sets the file offset position to 0
-output.seek(0)
-
-# retrieves the contents of the output stream
-contents = output.getvalue()
-
-# Copys from the stream to the opioids table
-cur.copy_from(output, 'opioids', null="") # null values become ''
-
-# Commits on the connection to the database
-conn.commit()
-
+## read rows set number of rows
+#arcos_df = pd.read_csv(full_path,nrows=15000, sep='\t')
+#
+## view transaction data column
+##arcos_df.iloc[:,30]
+#
+## view row 89, all columns
+##arcos_df.iloc[1,:]
+#
+## view by column name
+##arcos_df['QUANTITY']
+#
+## drops unneeded columns
+#arcos_df.drop(arcos_df.columns[[0, 1, 10, 13, 20, 21, 22, 26, 27, 28, 29, 33, 
+#                                35, 36, 37]], axis = 1, inplace = True)
+#
+## converts int format to month/day/year
+#arcos_df['TRANSACTION_DATE'] = pd.to_datetime(arcos_df['TRANSACTION_DATE'], 
+#                                              format='%m%d%Y')
+#
+## convert QUANTITY from float to int
+#arcos_df['QUANTITY'] = arcos_df['QUANTITY'].astype('int64')
+#arcos_df['DOSAGE_UNIT'] = arcos_df['DOSAGE_UNIT'].astype('int64')
+#arcos_df['MME_Conversion_Factor'] = arcos_df['MME_Conversion_Factor'].astype(
+#                                                                      'int64')
+## save to csv 
+#arcos_df.to_csv(path+'\\test.csv', index = False)
+#
+#
+####
+## Start SQL
+####
+#meta = MetaData()
+#
+## Creates a connection string
+#engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
+#
+## Creates a table using the column names and datatypes defined in the dataframe
+##arcos_df.head(0).to_sql('weaponproperties', engine, if_exists = 'replace', index = False)
+#
+## raw connection
+#conn = engine.raw_connection()
+#
+## Opens a cursor to write the data
+#cur = conn.cursor()
+#
+## prepares an in memory IO stream
+#output = io.StringIO()
+#
+## converts the dataframe contents to csv format and the IO steam as its destination
+#arcos_df.to_csv(output, sep='\t', header=False, index=False)
+#
+## sets the file offset position to 0
+#output.seek(0)
+#
+## retrieves the contents of the output stream
+#contents = output.getvalue()
+#
+## Copys from the stream to the opioids table
+#cur.copy_from(output, 'opioids', null="") # null values become ''
+#
+## Commits on the connection to the database
+#conn.commit()
+#
 ####
 # End SQL
-####
-
-######
-# End fixed size read and insert into db
-######
-
-####
-# Start batch testing
-# https://stackoverflow.com/questions/42900757/sequentially-read-huge-csv-file-in-python
-####
-
-# read rows set number of rows
-test_df = pd.read_csv(full_path,nrows=106, sep='\t')
-
-# converts int format to month/day/year
-test_df['TRANSACTION_DATE'] = pd.to_datetime(test_df['TRANSACTION_DATE'], 
-                                              format='%m%d%Y')
-
-# convert QUANTITY from float to int
-test_df['QUANTITY'] = test_df['QUANTITY'].astype('int64')
-test_df['DOSAGE_UNIT'] = test_df['DOSAGE_UNIT'].astype('int64')
-test_df['MME_Conversion_Factor'] = test_df['MME_Conversion_Factor'].astype(
-                                                                      'int64')
-# save to csv 
-test_df.to_csv(path+'\\test.csv', index = False)
-
-# setup file location
-test_file = 'test'
-test_full_path = os.path.join(path, test_file + '.csv')
-
-# setup variables
-chunksize = 10
-i = 0
-j = 1
-
-# for loop to read csv and write to db
-for df in pd.read_csv(test_full_path, chunksize=chunksize, iterator=True):
-    #test_df = df.rename(columns={c: c.replace(' ', '') for c in df.columns}) 
-    test_df = df
-    df.index += j
-    i+=1
-    
-    meta = MetaData()
-
-    # Creates a connection string
-    engine = create_engine('postgresql+psycopg2://python:password@localhost/arcos')
-    
-    # Creates a table using the column names and datatypes defined in the dataframe
-    test_df.head(0).to_sql('take', engine, if_exists = 'replace', \
-                            index = False)
-    
-##SQL    
-    # raw connection
-    conn = engine.raw_connection()
-    
-    # Opens a cursor to write the data
-    cur = conn.cursor()
-    
-    # prepares an in memory IO stream
-    output = io.StringIO()
-    
-    # converts the dataframe contents to csv format and the IO steam as its destination
-    test_df.to_csv(output, sep='\t', header=False, index=False)
-    
-    # sets the file offset position to 0
-    output.seek(0)
-    
-    # retrieves the contents of the output stream
-    contents = output.getvalue()
-    
-    # Copys from the stream to the opioids table
-    cur.copy_from(output, 'opioids', null="") # null values become ''
-    
-    # Commits on the connection to the database
-    conn.commit()
-##SQL
-    j = df.index[-1] + 1
-
-####
-# End batch testing
 ####
