@@ -45,19 +45,26 @@ for state in states:
     # Opens a cursor for the table create
     count_cursor = conn.cursor()
     
-    table_name = states[i]
+    #table_name = states[i]
 
     # query to select the count from the table
     select_query = sql.SQL("SELECT COUNT (*) FROM {}").format(
-            sql.Identifier(table_name))
+            sql.Identifier(states[i]))
     
     # executes the query
     count_cursor.execute(select_query)
     
     # appends the result to the counts list
-    counts.append(count_cursor.fetchall()[0][0]) 
+    counts.append([states[i], count_cursor.fetchall()[0][0]]) 
+    
+    i+=1
     
 # closes the SQL cursor, commits all SQL transactions
 count_cursor.close()
 
+total = 0
+
+for i in range(len(counts)):
+    total += counts[i][1]
     
+print(total)
