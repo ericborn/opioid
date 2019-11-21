@@ -4,7 +4,7 @@ Created on Wed Nov 20 11:10:12 2019
 
 @author: Eric
 Counts
-opioids - 178948026 records - 1 min 42 sec
+opioids - 178,948,026 records - 1 min 42 sec
 
 """
 import psycopg2
