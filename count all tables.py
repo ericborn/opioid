@@ -6,6 +6,9 @@ Created on Wed Nov 20 11:10:12 2019
 Counts
 opioids - 178,948,026 records - 1 min 42 sec
 opioids_full - 378,573,015 - 24 min 56 sec
+count from tables - 377,983,305
+count non-states - 589,381
+Total - 378,572,686‬
 
 """
 import psycopg2
@@ -14,8 +17,8 @@ from psycopg2 import sql
 from sqlalchemy import create_engine
 
 # full state list
-states = ['Alabama','Arizona','Arkansas','California','Colorado',
-          'Connecticut','Washington_dc','Delaware','Florida','Georgia',
+states = ['Alabama', 'Alaska','Arizona','Arkansas','California','Colorado',
+          'Connecticut','Delaware','Florida','Georgia',
           'Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky',
           'Louisiana','Maine','Maryland','Massachusetts','Michigan',
           'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
@@ -23,7 +26,7 @@ states = ['Alabama','Arizona','Arkansas','California','Colorado',
           'North_Carolina','North_Dakota','Ohio','Oklahoma','Oregon',
           'Pennsylvania','Rhode_Island','South_Carolina','South_Dakota',
           'Tennessee','Texas','Utah','Vermont','Virginia','Washington',
-          'West_Virginia','Wisconsin','Wyoming']
+          'Washington_dc','West_Virginia','Wisconsin','Wyoming']
 
 # convert states to lowercase
 states = [x.lower() for x in states]
