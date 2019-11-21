@@ -6,6 +6,7 @@ File to read the arcos tsv files and move the data into postgre db
 """
 import os
 import io
+import csv
 import pandas as pd
 import numpy as np
 import psycopg2
@@ -30,14 +31,18 @@ full_path = os.path.join(path, file + '.tsv')
 #arcos_df.iloc[:,30]
 
 # view row 89, all columns
-#arcos_df.iloc[89,:]
+#arcos_df.iloc[0,:]
 
 # view by column name
 #arcos_df['QUANTITY']
 
-#fake_data = [[92159], ['sjkhjdf']]
+#fake_data = [[92159], ["PINELLAS"]]
 #
-#fakedf = pd.DataFrame(fake_data, columns = ['REPORTER_ZIP'])
+#fakedf = pd.DataFrame(fake_data, columns = ['BUYER_ZIP'])
+#
+## remove non-digits from BUYER_ZIP
+#fakedf['BUYER_ZIP'].replace(to_replace=r'\D', value = '0',
+#                                          regex = True, inplace = True)
 
 def tsv_todb():
     # setup variables
@@ -72,6 +77,12 @@ def tsv_todb():
         
         arcos_df['Product_Name'].replace(to_replace=r'/', value = ' ',
                                          regex = True, inplace = True)
+        
+        # removes \ and , from buyer_name
+        arcos_df['BUYER_NAME'].replace(to_replace=r'\\', value = '',
+                                           regex = True, inplace = True)
+        arcos_df['BUYER_NAME'].replace(to_replace=r',', value = '',
+                                           regex = True, inplace = True)
         
         # removes \ and " from buyer_address1
         arcos_df['BUYER_ADDRESS1'].replace(to_replace=r'\\', value = '',
@@ -135,7 +146,8 @@ def tsv_todb():
         #contents = output.getvalue()
 
         # Copys from the stream to the opioids table
-        cur.copy_from(output, 'opioids_full', null="") # null values become ''
+        # null values become ''
+        cur.copy_from(output, 'opioids_full', null="")
 
         # Commits on the connection to the database
         conn.commit()
@@ -161,14 +173,23 @@ tsv_todb()
 # Single fixed size read and insert into db
 ######
 
+#with open(full_path) as fp:
+#    reader=csv.reader(fp, delimiter='\t')    
+#    rows=[row for idx, row in enumerate(reader) if idx == 28]
+    
+###TODO
+# BUILD BATCH READER THAT READS AND MAKES A CHECK FOR THE LAST ROW NUMBER
+# ONCE IT PASSES 16605635 BY A SMALL NUMBER IT SAVES THE CURRENG BATCH
+# TO A DATAFRAME AND BREAKS THE LOOP
+
 # read rows set number of rows
-arcos_df = pd.read_csv(full_path,nrows=150, sep='\t')
+arcos_df = pd.read_csv(full_path,nrows=1, sep='\t')
 
 # view transaction data column
 #arcos_df.iloc[:,30]
 
 # view row 89, all columns
-#arcos_df.iloc[1491502,:]
+#arcos_df.iloc[16500000,:]
 
 # view by column name
 #arcos_df['QUANTITY']
