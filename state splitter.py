@@ -9,10 +9,10 @@ separate tables for each state based on the buyer_state column.
 The script will create a table for each state that is present in the data and
 then insert the data for that state from the main table.
 
-There was no data present from Alaska so the state was ignored.
 There was data present for US territories, but these were not included
 due to being only about 500 rows.
 """
+import time
 import psycopg2
 from sys import exit
 from psycopg2 import sql
@@ -27,8 +27,8 @@ from sqlalchemy import create_engine
 #initials_test = ['AL','AZ']
 
 # state list
-states = ['Alabama','Arizona','Arkansas','California','Colorado',
-          'Connecticut','Washington_dc','Delaware','Florida','Georgia',
+states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado',
+          'Connecticut','Delaware','Florida','Georgia',
           'Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky',
           'Louisiana','Maine','Maryland','Massachusetts','Michigan',
           'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
@@ -36,16 +36,16 @@ states = ['Alabama','Arizona','Arkansas','California','Colorado',
           'North_Carolina','North_Dakota','Ohio','Oklahoma','Oregon',
           'Pennsylvania','Rhode_Island','South_Carolina','South_Dakota',
           'Tennessee','Texas','Utah','Vermont','Virginia','Washington',
-          'West_Virginia','Wisconsin','Wyoming']
+          'Washington_dc','West_Virginia','Wisconsin','Wyoming']
 
 # convert states to lowercase
 states = [x.lower() for x in states]
 
 # state initials list
-initials = ['AL','AZ','AR','CA','CO','CT','DC','DE','FL','GA','HI','ID',
+initials = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID',
             'IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO',
             'MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA',
-            'RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
+            'RI','SC','SD','TN','TX','UT','VT','VA','WA','DC','WV','WI','WY']
 
 ###
 # Start SQL
@@ -59,7 +59,13 @@ conn = engine.raw_connection()
 # index variable
 i = 0
 
+timings_list = []
+timings_list.append(['Global loop start:', time.time()])
+
 for state in states: 
+    # start of loop time
+    timings_list.append([states[i]+' state loop start', time.time()])
+    
     # Opens a cursor for the table create
     table_cur = conn.cursor()
     
@@ -117,8 +123,11 @@ for state in states:
     # where buyer_state is equal to the states initials
     # formats the table name to an identifier and 
     # the initials to a string literal
-    query = sql.SQL("INSERT INTO {0} SELECT * FROM opioids WHERE buyer_state = {1}").format(
-            sql.Identifier(table_name), sql.Literal(init_name))
+    query = sql.SQL('''INSERT INTO {0} 
+                       SELECT * 
+                       FROM opioids_full 
+                       WHERE buyer_state = {1}''').format(sql.Identifier(
+                       table_name), sql.Literal(init_name))
     
     # print the query as it would be passed to SQL
     #print(query.as_string(cur))
@@ -130,12 +139,17 @@ for state in states:
     insert_cur.close()
     conn.commit()
     
+    # end of loop time
+    timings_list.append([states[i]+' state loop end', time.time()])
+    
     # iterate to the next index in the states
     i += 1
+
 
 # closes connection to the SQL server
 conn.close()
 
+timings_list.append(['Global loop end', time.time()])
 ####
 # End SQL
 ####
