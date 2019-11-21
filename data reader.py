@@ -44,9 +44,11 @@ full_path = os.path.join(path, file + '.tsv')
 #fakedf['BUYER_ZIP'].replace(to_replace=r'\D', value = '0',
 #                                          regex = True, inplace = True)
 
+# 40,750,000
+
 def tsv_todb():
     # setup variables
-    chunksize = 250000
+    chunksize = 500000
     i = 0
     j = 1
     
