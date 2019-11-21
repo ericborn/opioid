@@ -5,6 +5,7 @@ Created on Wed Nov 20 11:10:12 2019
 @author: Eric
 Counts
 opioids - 178,948,026 records - 1 min 42 sec
+opioids_full - 378,573,015 - 24 min 56 sec
 
 """
 import psycopg2
@@ -53,7 +54,7 @@ for state in states:
     
     # executes the query
     count_cursor.execute(select_query)
-    
+
     # appends the result to the counts list
     counts.append([states[i], count_cursor.fetchall()[0][0]]) 
     
