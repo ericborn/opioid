@@ -28,7 +28,7 @@ zip_df.drop(zip_df.columns[[1,2,3,4,5,6,8]], axis = 1, inplace = True)
 
 # rename columns
 zip_df.rename(columns={'zip_code':'zip',
-                       'y-2010':'2010'}, inplace=True)
+                       'y-2010':'population'}, inplace=True)
 
 # Start SQL
 # Creates a connection string
