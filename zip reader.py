@@ -22,8 +22,9 @@ zip_df = pd.read_csv(full_path)
 # remove all columns except zip and 2010 population
 zip_df.drop(zip_df.columns[[1,2,3,4,5,6,8]], axis = 1, inplace = True)
 
+# CANNOT PAD, TURNS INT INTO STRING/OBJECT
 # pad 0's on zipcodes that start with 0 or 00
-zip_df['zip_code'] = zip_df['zip_code'].apply(lambda x: '{0:0>5}'.format(x))
+#zip_df['zip_code'] = zip_df['zip_code'].apply(lambda x: '{0:0>5}'.format(x))
 
 # rename columns
 zip_df.rename(columns={'zip_code':'zip',
