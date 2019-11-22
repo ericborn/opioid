@@ -12,7 +12,6 @@ count US territories - 589,381
 Total - 378,572,686‬
 """
 import psycopg2
-from sys import exit
 from psycopg2 import sql
 from sqlalchemy import create_engine
 
