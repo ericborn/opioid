@@ -4,12 +4,12 @@ Created on Wed Nov 20 11:10:12 2019
 
 @author: Eric
 Counts
-opioids - 178,948,026 records - 1 min 42 sec
-opioids_full - 378,573,015 - 24 min 56 sec
+opioids - 178,948,026 records
+opioids_full - 378,573,015
 count from tables - 377,983,305
-count non-states - 589,381
+count US territories - 589,381
+329 null
 Total - 378,572,686‬
-
 """
 import psycopg2
 from sys import exit
@@ -72,3 +72,6 @@ for i in range(len(counts)):
     total += counts[i][1]
     
 print(total)
+
+# use to find table size, could loop through state names to find size of each
+# SELECT pg_size_pretty( pg_total_relation_size('opioids_full') );
