@@ -29,7 +29,7 @@ sellers = []
 i = 0   
 for state in states: 
     # Opens a cursor for the table create
-    count_cursor = conn.cursor()
+    select_cursor = conn.cursor()
     
     #table_name = states[i]
 
@@ -39,22 +39,16 @@ for state in states:
                               GROUP BY reporter_name
                               ORDER BY count DESC
                               LIMIT 10''').format(
-            sql.Identifier(states[i]))
+            sql.Identifier(states[0]))
+            #sql.Identifier(states[i]))
     
     # executes the query
-    count_cursor.execute(select_query)
-
-    # appends the result to the counts list
-    sellers.append([states[i], count_cursor.fetchall()[0][0]]) 
+    select_cursor.execute(select_query)
+    
+    # appends query results to sellers list
+    sellers.append(select_cursor.fetchall())
     
     i+=1
     
 # closes the SQL cursor, commits all SQL transactions
-count_cursor.close()
-
-total = 0
-
-for i in range(len(counts)):
-    total += counts[i][1]
-    
-print(total)
+select_cursor.close()
