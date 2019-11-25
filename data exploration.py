@@ -39,7 +39,7 @@ for state in states:
                               GROUP BY reporter_name
                               ORDER BY count DESC
                               LIMIT 10''').format(
-            sql.Identifier(states[0])) 
+            sql.Identifier(states[i])) 
             #sql.Identifier(states[i]))
     
     # executes the query
@@ -60,6 +60,7 @@ flat = [item for sublist in sellers for item in sublist]
 data = []
 
 # creates a new list with state name, company and total
+# uses ranges to set the correct state with the data
 for i in range(len(flat)):
     if i < 9:
         data.append([states[0], flat[i][0], flat[i][1]])
