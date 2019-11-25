@@ -39,7 +39,7 @@ for state in states:
                               GROUP BY reporter_name
                               ORDER BY count DESC
                               LIMIT 10''').format(
-            sql.Identifier(states[0]))
+            sql.Identifier(states[0])) 
             #sql.Identifier(states[i]))
     
     # executes the query
@@ -52,3 +52,28 @@ for state in states:
     
 # closes the SQL cursor, commits all SQL transactions
 select_cursor.close()
+
+# flattens sellers into a single list of tuples
+flat = [item for sublist in sellers for item in sublist]
+
+# empty list
+data = []
+
+# creates a new list with state name, company and total
+for i in range(len(flat)):
+    if i < 9:
+        data.append([states[0], flat[i][0], flat[i][1]])
+    if i > 9 and i < 19:
+        data.append([states[1], flat[i][0], flat[i][1]])
+    if i > 19 and i < 29:
+        data.append([states[2], flat[i][0], flat[i][1]])
+    if i > 29 and i < 39:
+        data.append([states[3], flat[i][0], flat[i][1]])
+    if i > 39 and i < 49:
+        data.append([states[4], flat[i][0], flat[i][1]])     
+    if i > 49:
+        data.append([states[5], flat[i][0], flat[i][1]])          
+        
+        
+# turns the data list into a dataframe
+state_df = pd.DataFrame(data, columns = ['state', 'company', 'total'])
